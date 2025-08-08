@@ -2,15 +2,14 @@
 
 %if "%{_vendor}" == "debbuild"
 #%define go_bin go
-%define go_bin /usr/lib/go-1.22/bin/go
-%global go_bin /usr/lib/go-1.22/bin/go
+%define go_bin /usr/lib/go-1.23/bin/go
+%global go_bin /usr/lib/go-1.23/bin/go
 
 %global _unitdir %{_usr}/lib/systemd/system
 %global _userunitdir %{_usr}/lib/systemd/user
 %global _tmpfilesdir %{_usr}/lib/tmpfiles.d
 %global _systemdgeneratordir %{_prefix}/lib/systemd/system-generators
 %global _systemdusergeneratordir %{_prefix}/lib/systemd/user-generators
-#%define gobuild(o:) GO111MODULE=off go build -buildmode pie -tags=" ${BUILDTAGS:-}" -a -v -x %{?**};
 %define gobuild(o:) GO111MODULE=off %{go_bin} build -buildmode pie -tags=" ${BUILDTAGS:-}" -a -v -x %{?**};
 %endif
 
@@ -63,7 +62,7 @@ Epoch: 4
 Version: %{built_tag_strip}
 Packager: Podman Debbuild Maintainers <https://github.com/orgs/containers/teams/podman-debbuild-maintainers>
 License: Apache-2.0 and BSD-2-Clause and BSD-3-Clause and ISC and MIT and MPL-2.0
-Release: 9000~joelpurra+%{?dist}
+Release: 9003~lfv+%{?dist}
 Summary: Manage Pods, Containers and Container Images
 URL: https://%{name}.io/
 Source0: %{git0}/archive/v%{built_tag_strip}.tar.gz
@@ -87,11 +86,14 @@ BuildRequires: libgpgme-dev
 BuildRequires: libseccomp-dev
 BuildRequires: libsystemd-dev
 BuildRequires: pkg-config
-BuildRequires: golang-1.22-go
+BuildRequires: golang-1.23-go
 BuildRequires: libc6
 BuildRequires: gettext-base
-Requires: conmon >= 2:2.0.30
-Requires: containers-common >= 4:1
+Requires: conmon
+Requires: golang-github-containers-common
+Requires: podman-gvproxy
+Requires: slirp4netns
+Requires: runc
 Requires: uidmap
 %endif
 Recommends: %{name}-gvproxy = %{epoch}:%{version}-%{release}
@@ -195,11 +197,13 @@ tar zxf %{SOURCE2}
 tar zxf %{SOURCE3}
 
 %build
+# Disable Go’s automatic toolchain download (needs Internet)
+export GOTOOLCHAIN=local
 
 export GOEXPERIMENT=rangefunc
 export BUILDTAGS="goexperiment.rangefunc ${BUILDTAGS:-}"
 
-export PATH=/usr/lib/go-1.22/bin:$PATH
+export PATH=/usr/lib/go-1.23/bin:$PATH
 
 export GOFLAGS='-p=2'
 export GO111MODULE=off
@@ -259,6 +263,10 @@ export GO111MODULE=auto
 %{__make} docs docker-docs
 
 %install
+# Disable Go’s automatic toolchain download (needs Internet)
+export GOTOOLCHAIN=local
+# Set custom path
+export PATH=/usr/lib/go-1.23/bin:$PATH
 install -dp %{buildroot}%{_unitdir}
 PODMAN_VERSION=%{version} %{__make} PREFIX=%{buildroot}%{_prefix} ETCDIR=%{buildroot}%{_sysconfdir} \
        install.bin \
