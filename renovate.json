@@ -1,0 +1,25 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "regexManagers": [
+    {
+      "fileMatch": ["(^|/).*\\.spec$"],
+      "matchStrings": [
+        "(?m)^%global\\s+built_tag_strip\\s+(?<currentValue>[^\\s#]+)\\s*$"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "containers/podman",
+      "versioningTemplate": "semver",
+      "extractVersionTemplate": "^v?(?<version>.*)$",
+      "replaceString": "%global built_tag_strip {{newValue}}"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchDatasources": ["github-releases"],
+      "matchPackageNames": ["containers/podman"],
+      "groupName": "podman release",
+      "prCreation": "immediate"
+    }
+  ]
+}
