@@ -1,7 +1,6 @@
 %%{!?ldconfig_scriptlets:%global ldconfig_scriptlets() %nil}
 
 %if "%{_vendor}" == "debbuild"
-#%define go_bin go
 %define go_bin /usr/lib/go-1.23/bin/go
 %global go_bin /usr/lib/go-1.23/bin/go
 
