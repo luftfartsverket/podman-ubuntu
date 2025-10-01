@@ -54,7 +54,7 @@
 %global commit_gvproxy %{commit_gvproxy062}
 %endif
 
-%global built_tag_strip 5.5.2
+%global built_tag_strip 5.6.2
 
 Name: podman
 Epoch: 4
